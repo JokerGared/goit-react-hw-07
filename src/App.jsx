@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { ContactForm, SearchBox, ContactList } from "./components";
-import { useSelector } from "react-redux";
-import { selectContacts } from "./redux/contactsSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectContacts,
+  selectError,
+  selectLoading,
+} from "./redux/contactsSlice";
+import { fetchContacts } from "./redux/contactsOps";
+import Loader from "./components/Loader/Loader";
 
 function App() {
   const contacts = useSelector(selectContacts);
+  const error = useSelector(selectError);
+  const isLoading = useSelector(selectLoading);
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
     <>
@@ -13,7 +26,11 @@ function App() {
       <ContactForm />
       <SearchBox />
       <ContactList />
-      {contacts.length < 1 && <p>There is no contacts yet</p>}
+      {isLoading && <Loader />}
+      {contacts.length < 1 && !error && !isLoading && (
+        <p>There is no contacts yet</p>
+      )}
+      {error && <p>Server is dead...</p>}
     </>
   );
 }
